@@ -1,9 +1,12 @@
 import {useState, useEffect} from 'react';
 
-
 const PokemonList = () => {
     const [pokemon, setPokemon] = useState([]);
+    const [sortOrder,setSortOrder] = useState("asc");
+    const [showConfirm, setShowConfirm] = useState(false);
+const [selectedPokemon, setSelectedPokemon] = useState(null);
 
+ 
     useEffect(() => {
         fetch("https://pokeapi.co/api/v2/pokemon")
             .then((res) =>  res.json())
@@ -12,14 +15,32 @@ const PokemonList = () => {
     },[]);
 
 
+//sorting pokemon list order from A-Z and Z-A
+// const sortedOrderList = () => {
+//     if(sortOrder == 'asc') {
+//         return a.name.localeCompare(b.name);
+//     } else {
+//         return b.name.localeCompare(a.name);
+
+//     }
+// }
 
 const handleDelete = (name) => {
-  const updatedList = pokemon.filter((p) => p.name !== name);
-  setPokemon(updatedList);
-};
+const isConfirm = window.confirm("Are you sure");
+   if (isConfirm) {
+    setPokemon(pokemon.filter((p) => p.name !== name));
+  } 
+}
 
+// const confirmDelete = () => {
+//   setPokemon(pokemon.filter(p => p.name !== name));
+//   setShowConfirm(false);
+// };
+const sortedPokemon = [...pokemon].sort((a, b) =>
+  a.name.localeCompare(b.name)
+);
 
-    return ( 
+return ( 
 <table style={{ borderCollapse: "collapse", width: "50%",border: "1px solid red"  }}>
     <thead border = "1" >
         <tr>
@@ -30,9 +51,7 @@ const handleDelete = (name) => {
     </thead>
      
     <tbody>
-        { pokemon
-        .slice()
-        .sort((a,b )=> a.name.localeCompare((b.name)))
+        { sortedPokemon
         .map((p, index) => (
 
     <tr >
@@ -48,11 +67,14 @@ const handleDelete = (name) => {
         <td>
             <button onClick={() => handleDelete(p.name)}>
                 DELETEEE ROW
-                </button>
+            </button>
+
+            {/* <button onClick={confirmDelete}>
+  Delete
+</button> */}
         </td>
     </tr>
-
-    
+   
 ))}
     </tbody> 
     </table>
