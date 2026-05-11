@@ -2,10 +2,10 @@ import {useState, useEffect} from 'react';
 
 const PokemonList = () => {
     const [pokemon, setPokemon] = useState([]);
-    const [sortOrder,setSortOrder] = useState("asc");
     const [showConfirm, setShowConfirm] = useState(false);
-const [selectedPokemon, setSelectedPokemon] = useState(null);
-
+    const [selectedPokemon, setSelectedPokemon] = useState(null);
+    // adding search filter
+    const [search, setSearch] = useState("");
  
     useEffect(() => {
         fetch("https://pokeapi.co/api/v2/pokemon")
@@ -15,15 +15,9 @@ const [selectedPokemon, setSelectedPokemon] = useState(null);
     },[]);
 
 
-//sorting pokemon list order from A-Z and Z-A
-// const sortedOrderList = () => {
-//     if(sortOrder == 'asc') {
-//         return a.name.localeCompare(b.name);
-//     } else {
-//         return b.name.localeCompare(a.name);
-
-//     }
-// }
+const filteredPokemon = pokemon.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+);
 
 const handleDelete = (name) => {
 const isConfirm = window.confirm("Are you sure");
@@ -32,17 +26,26 @@ const isConfirm = window.confirm("Are you sure");
   } 
 }
 
-// const confirmDelete = () => {
-//   setPokemon(pokemon.filter(p => p.name !== name));
-//   setShowConfirm(false);
-// };
+const confirmDelete = () => {
+  setPokemon(pokemon.filter(p => p.name !== name));
+  setShowConfirm(false);
+};
+
+const cancelDelete = () => {
+    setShowConfirm(false);
+}
+
+//sorted order list A-Z
 const sortedPokemon = [...pokemon].sort((a, b) =>
   a.name.localeCompare(b.name)
 );
 
 return ( 
+<>
+<input type= "text" placeholder=' Enter name' value= {search}  onChange={(e) => setSearch(e.target.value)}/>
 <table style={{ borderCollapse: "collapse", width: "50%",border: "1px solid red"  }}>
-    <thead border = "1" >
+ <thead border = "1" >
+
         <tr>
            <th>index</th>
            <th>Name</th>
@@ -51,12 +54,10 @@ return (
     </thead>
      
     <tbody>
-        { sortedPokemon
-        .map((p, index) => (
-
-    <tr >
+        { filteredPokemon.length > 0  ? (filteredPokemon.map((p, index) => (
+    <tr key={p.name}>
         <td style= {{border: "1px solid black"  }}>
-            {index}
+            {index + 1}
         </td>
         <td style= {{border: "1px solid black"  }}>
             {p.name}
@@ -69,16 +70,31 @@ return (
                 DELETEEE ROW
             </button>
 
-            {/* <button onClick={confirmDelete}>
-  Delete
-</button> */}
+            {/* <button onClick={confirmDelete}> Delete</button> */}
+
+            {/* <button onClick={() => {setSelectedPokemon(p.name);
+                setShowConfirm(true);
+            }}>DELL</button> */}
+
+            {/* <p>Are you sure</p>
+
+            <button onClick={confirmDelete}>YES</button>
+            <button onClick={cancelDelete}>NOO</button>  */}
         </td>
     </tr>
    
-))}
+))) : (
+            <tr>
+              <td colSpan="2" style={{ textAlign: "center" , color: "red" , padding: '10px'}}>
+                No Pokémon found
+              </td>
+            </tr>
+          )}
     </tbody> 
     </table>
+</>
 );
+
 }
 
 export default PokemonList;
