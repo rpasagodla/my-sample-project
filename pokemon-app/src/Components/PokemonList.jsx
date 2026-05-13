@@ -4,6 +4,7 @@ const PokemonList = () => {
     const [pokemon, setPokemon] = useState([]);
     const [showConfirm, setShowConfirm] = useState(false);
     const [selectedPokemon, setSelectedPokemon] = useState(null);
+    const [sortOrder,setSortOrder] = useState("asc")
     // adding search filter
     const [search, setSearch] = useState("");
  
@@ -14,20 +15,34 @@ const PokemonList = () => {
             .catch((err)  => console.log(err) )
     },[]);
 
+//this func is used to filter array 
+// const filteredPokemon = pokemon.filter((p) =>
+//     p.name.toLowerCase().includes(search.toLowerCase())
+// );
 
-const filteredPokemon = pokemon.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-);
+// combining filter + sort together before rendering the table.
 
+//Creates copy of state array to avoid mutating React state directly.
+const filteredPokemon = [...pokemon]
+.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+.sort((a,b) => {
+    if(sortOrder === "asc") {
+        return a.name.localeCompare(b.name)
+    } else {
+        return b.name.localeCompare(a.name)
+    }
+});
+
+// delete the row in a table
 const handleDelete = (name) => {
-const isConfirm = window.confirm("Are you sure");
+const isConfirm = window.confirm("Are you sure to delete ");
    if (isConfirm) {
     setPokemon(pokemon.filter((p) => p.name !== name));
   } 
 }
 
 const confirmDelete = () => {
-  setPokemon(pokemon.filter(p => p.name !== name));
+  setPokemon(pokemon.filter(p => p.name !== selectedPokemon));
   setShowConfirm(false);
 };
 
@@ -36,14 +51,43 @@ const cancelDelete = () => {
 }
 
 //sorted order list A-Z
-const sortedPokemon = [...pokemon].sort((a, b) =>
-  a.name.localeCompare(b.name)
-);
+// const sortedPokemon = [...pokemon].sort((a, b) =>
+//   a.name.localeCompare(b.name)
+// );
 
+const styles = {
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(102, 38, 145, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  popup: {
+    background: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    textAlign: "center",
+    spacing:"10px"
+  }
+};
 return ( 
 <>
-<input type= "text" placeholder=' Enter name' value= {search}  onChange={(e) => setSearch(e.target.value)}/>
-<table style={{ borderCollapse: "collapse", width: "50%",border: "1px solid red"  }}>
+
+<div>
+    <h1 style={{color: "red"}}>Pokemon List</h1>
+    <p> Serch for Pokemon Names and Filter. And also can delete pokemon if not required</p>
+</div>
+<input style={{padding:"10px"}} type= "text" placeholder= 'Search Pokemon Name' value= {search}  onChange={(e) => setSearch(e.target.value)}/>
+
+{/* creating sort button  */}
+
+<button onClick ={() => setSortOrder (sortOrder === "asc" ? "desc" :"asc")}> Sort: --- {sortOrder.toUpperCase()}</button>
+<table style={{ borderCollapse: "collapse" , border: "2px solid black"}}>
  <thead border = "1" >
 
         <tr>
@@ -62,31 +106,38 @@ return (
         <td style= {{border: "1px solid black"  }}>
             {p.name}
         </td>
-        <td style= {{border: "1px solid black"  }}  >
+        <td style= {{border: "1px solid black"}}  >
             {p.url}
         </td>
-        <td>
-            <button onClick={() => handleDelete(p.name)}>
-                DELETEEE ROW
-            </button>
 
-            {/* <button onClick={confirmDelete}> Delete</button> */}
+        <td style= {{border: "1px solid black"  }}>
+            {/* <button onClick={() => handleDelete(p.name)}>
+                DELETE ROW
+            </button> */}
 
-            {/* <button onClick={() => {setSelectedPokemon(p.name);
+            <button style={{ color: "white", backgroundColor: "green"}} onClick={() => {
+                setSelectedPokemon(p.name);
                 setShowConfirm(true);
-            }}>DELL</button> */}
-
-            {/* <p>Are you sure</p>
-
-            <button onClick={confirmDelete}>YES</button>
-            <button onClick={cancelDelete}>NOO</button>  */}
+            }}>Delete</button>
         </td>
+
+        {console.log('selectedPokemon', selectedPokemon)}
+
+        {showConfirm && (
+        <div style={styles.overlay}>
+            <div style={styles.popup}>
+            <p>Are you sure to delete :{selectedPokemon}</p>
+            <button style={{ color: "white", backgroundColor: "green", spacing: "10px", marginRight: "10px"}} onClick={confirmDelete}>Yes</button> 
+            <button style={{color: "white",backgroundColor: "red"}}onClick={cancelDelete}>No</button>
+            </div>
+        </div>
+)}
     </tr>
    
 ))) : (
             <tr>
               <td colSpan="2" style={{ textAlign: "center" , color: "red" , padding: '10px'}}>
-                No Pokémon found
+                No Pokemon found
               </td>
             </tr>
           )}
@@ -94,7 +145,6 @@ return (
     </table>
 </>
 );
-
 }
 
 export default PokemonList;
